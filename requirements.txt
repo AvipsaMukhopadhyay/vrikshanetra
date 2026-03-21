@@ -1,15 +1,12 @@
+Flask==1.1.2
+Werkzeug==2.1.2
+Jinja2==2.11.3
+itsdangerous==1.1.0
+MarkupSafe==2.0.1
+
 tensorflow==2.3.0
 numpy==1.18.5
 h5py==2.10.0
 scipy==1.4.1
 
-protobuf==3.20.3
-jinja2==2.11.3
-markupsafe==2.0.1
-itsdangerous==1.1.0
-
-flask==1.1.2
 gunicorn==20.1.0
-
-setuptools==58.0.0
-wheel
