@@ -1,9 +1,11 @@
+import os
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 import numpy as np
 from flask import Flask, request, render_template
 from werkzeug.utils import secure_filename
-import os
 
 app = Flask(__name__)
 
@@ -15,16 +17,16 @@ except:
     SoilNet = None
 
 classes = {
-    0:"Alluvial Soil:-{ Rice,Wheat,Sugarcane,Maize,Cotton,Soyabean,Jute }",
-    1:"Black Soil:-{ Virginia, Wheat , Jowar,Millets,Linseed,Castor,Sunflower}",
-    2:"Clay Soil:-{ Rice,Lettuce,Chard,Broccoli,Cabbage,Snap Beans }",
-    3:"Red Soil:{ Cotton,Wheat,Pulses,Millets,OilSeeds,Potatoes }"
+    0: "Alluvial Soil:-{ Rice,Wheat,Sugarcane,Maize,Cotton,Soyabean,Jute }",
+    1: "Black Soil:-{ Virginia, Wheat , Jowar,Millets,Linseed,Castor,Sunflower}",
+    2: "Clay Soil:-{ Rice,Lettuce,Chard,Broccoli,Cabbage,Snap Beans }",
+    3: "Red Soil:{ Cotton,Wheat,Pilses,Millets,OilSeeds,Potatoes }"
 }
 
 def model_predict(image_path, model):
-    image = load_img(image_path, target_size=(224,224))
+    image = load_img(image_path, target_size=(224, 224))
     image = img_to_array(image)
-    image = image / 255
+    image = image / 255.0
     image = np.expand_dims(image, axis=0)
 
     result = np.argmax(model.predict(image))
@@ -38,24 +40,33 @@ def model_predict(image_path, model):
     elif result == 3:
         return "Red", "Red.html"
 
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
-@app.route('/predict', methods=['POST'])
+
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    if SoilNet is None:
-        return "Model not loaded"
+    if request.method == 'POST':
 
-    file = request.files['image']
-    filename = secure_filename(file.filename)
+        if SoilNet is None:
+            return "Model not loaded"
 
-    upload_dir = "static/uploads"
-    os.makedirs(upload_dir, exist_ok=True)
+        file = request.files['image']
+        filename = secure_filename(file.filename)
 
-    file_path = os.path.join(upload_dir, filename)
-    file.save(file_path)
+        upload_dir = "static/uploads"
+        os.makedirs(upload_dir, exist_ok=True)
 
-    pred, output_page = model_predict(file_path, SoilNet)
+        file_path = os.path.join(upload_dir, filename)
+        file.save(file_path)
 
-    return render_template(output_page, pred_output=pred, user_image=file_path)
+        pred, output_page = model_predict(file_path, SoilNet)
+
+        return render_template(output_page, pred_output=pred, user_image=file_path)
+
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
