@@ -30,13 +30,13 @@ def model_predict(image_path, model):
     result = np.argmax(model.predict(image))
 
     if result == 0:
-        return "Alluvial","Alluvial.html"
+        return "Alluvial", "Alluvial.html"
     elif result == 1:
-        return "Black","Black.html"
+        return "Black", "Black.html"
     elif result == 2:
-        return "Clay","Clay.html"
+        return "Clay", "Clay.html"
     elif result == 3:
-        return "Red","Red.html"
+        return "Red", "Red.html"
 
 @app.route('/', methods=['GET'])
 def index():
@@ -59,7 +59,3 @@ def predict():
     pred, output_page = model_predict(file_path, SoilNet)
 
     return render_template(output_page, pred_output=pred, user_image=file_path)
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
